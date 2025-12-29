@@ -142,8 +142,9 @@ export default async function CustomerTypePage({ params }: PageProps) {
         <section className="mb-6 animate-fade-up delay-100">
           <ContactCard
             lang={lang}
-            phone="+34 900 123 456"
-            email="info@benotac.es"
+            name="Jesus Perez"
+            phone="+34 682 637 118"
+            email="jesus@benotac.es"
           />
         </section>
 
@@ -151,8 +152,8 @@ export default async function CustomerTypePage({ params }: PageProps) {
         <section className="mb-6 animate-fade-up delay-200">
           <SocialLinks
             lang={lang}
-            linkedinUrl="https://linkedin.com/company/benotac"
-            instagramUrl="https://instagram.com/benotac"
+            linkedinUrl="https://linkedin.com/company/benotacpremiumreseller"
+            instagramUrl="https://instagram.com/benotac.apple"
           />
         </section>
 

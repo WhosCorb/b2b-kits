@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 import { Mail, Phone, MapPin } from 'lucide-react'
 
 interface ContactCardProps {
+  name?: string
   phone?: string
   email?: string
   address?: string
@@ -27,6 +28,7 @@ const translations = {
 }
 
 export function ContactCard({
+  name,
   phone = '+34 900 123 456',
   email = 'info@benotac.es',
   address,
@@ -69,9 +71,14 @@ export function ContactCard({
         className
       )}
     >
-      <h3 className="mb-4 font-[var(--font-display)] text-lg font-semibold tracking-tight text-[var(--foreground)]">
-        {t.title}
-      </h3>
+      <div className="mb-4">
+        <h3 className="font-[var(--font-display)] text-lg font-semibold tracking-tight text-[var(--foreground)]">
+          {name || t.title}
+        </h3>
+        {name && (
+          <p className="text-xs text-[var(--muted)] mt-0.5">{t.title}</p>
+        )}
+      </div>
 
       <div className="space-y-3">
         {contactItems.map((item) => (

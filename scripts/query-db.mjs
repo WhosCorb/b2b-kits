@@ -1,14 +1,16 @@
 import { createClient } from '@supabase/supabase-js'
 
-// You'll need to get the anon key from Supabase dashboard
-const SUPABASE_URL = 'https://qpjhztqdeynruvtxtwvq.supabase.co'
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+// Get credentials from environment variables
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-if (!SUPABASE_SERVICE_KEY) {
-  console.log('Please provide SUPABASE_SERVICE_ROLE_KEY environment variable')
-  console.log('Get it from: Supabase Dashboard > Settings > API > service_role key')
-  console.log('')
-  console.log('Run with: SUPABASE_SERVICE_ROLE_KEY=your-key node scripts/query-db.mjs')
+if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+  console.error('Missing required environment variables:')
+  console.error('  NEXT_PUBLIC_SUPABASE_URL')
+  console.error('  SUPABASE_SERVICE_ROLE_KEY')
+  console.error('')
+  console.error('Run with:')
+  console.error('  NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co SUPABASE_SERVICE_ROLE_KEY=xxx node scripts/query-db.mjs')
   process.exit(1)
 }
 

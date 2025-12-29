@@ -1,5 +1,19 @@
-const SUPABASE_URL = 'https://qpjhztqdeynruvtxtwvq.supabase.co'
-const SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwamh6dHFkZXlucnV2dHh0d3ZxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NzAxMTA1NCwiZXhwIjoyMDgyNTg3MDU0fQ.JwLp465bGqC9BKk4IwJqC7hxIl7SGKtoOymDlwvX1dg'
+// Get credentials from environment variables
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
+  console.error('Missing required environment variables:')
+  console.error('  NEXT_PUBLIC_SUPABASE_URL')
+  console.error('  SUPABASE_SERVICE_ROLE_KEY')
+  console.error('')
+  console.error('Run with:')
+  console.error('  NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co SUPABASE_SERVICE_ROLE_KEY=xxx node scripts/create-codes.mjs')
+  console.error('')
+  console.error('Or create a .env.local file and run:')
+  console.error('  source <(grep -v "^#" .env.local | xargs -I {} echo "export {}") && node scripts/create-codes.mjs')
+  process.exit(1)
+}
 
 async function main() {
   // Get customer types

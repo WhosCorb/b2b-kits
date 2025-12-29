@@ -107,7 +107,7 @@ export default async function CustomerTypePage({ params }: PageProps) {
   const tagline = config.tagline[lang]
   const description = config.description[lang]
 
-  const ctaText = lang === 'es' ? 'Visitar empresas.benotac.es' : 'Visit empresas.benotac.es'
+  const ctaText = lang === 'es' ? 'Visita nuestra web' : 'Visit our website'
 
   return (
     <LandingWrapper initialLocale={lang} type={type}>
@@ -160,7 +160,7 @@ export default async function CustomerTypePage({ params }: PageProps) {
         {/* CTA Button */}
         <section className="mb-8 animate-fade-up delay-300">
           <a
-            href="https://empresas.benotac.es"
+            href="https://empresas.benotac.es/customer/account/create/"
             target="_blank"
             rel="noopener noreferrer"
             className="block"

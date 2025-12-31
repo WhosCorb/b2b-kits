@@ -1,7 +1,8 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { Mail, Phone, MapPin } from 'lucide-react'
+import { Mail, Phone, MapPin, ChevronDown } from 'lucide-react'
+import { useState } from 'react'
 
 interface ContactCardProps {
   name?: string
@@ -10,6 +11,7 @@ interface ContactCardProps {
   address?: string
   lang?: 'es' | 'en'
   className?: string
+  defaultExpanded?: boolean
 }
 
 const translations = {
@@ -34,8 +36,10 @@ export function ContactCard({
   address,
   lang = 'es',
   className,
+  defaultExpanded = false,
 }: ContactCardProps) {
   const t = translations[lang]
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded)
 
   const contactItems = [
     {
@@ -65,52 +69,88 @@ export function ContactCard({
   return (
     <div
       className={cn(
-        'rounded-xl border bg-[var(--card)] p-6',
+        'rounded-xl border bg-[var(--card)] overflow-hidden',
         'shadow-[var(--shadow-md)]',
         'transition-shadow duration-300 hover:shadow-[var(--shadow-lg)]',
         className
       )}
     >
-      <div className="mb-4">
-        <h3 className="font-[var(--font-display)] text-lg font-semibold tracking-tight text-[var(--foreground)]">
-          {name || t.title}
-        </h3>
-        {name && (
-          <p className="text-xs text-[var(--muted)] mt-0.5">{t.title}</p>
+      {/* Collapsible Header */}
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className={cn(
+          'w-full flex items-center justify-between p-4',
+          'transition-colors duration-200',
+          'hover:bg-[var(--accent-light)]'
         )}
-      </div>
-
-      <div className="space-y-3">
-        {contactItems.map((item) => (
-          <a
-            key={item.label}
-            href={item.href}
+      >
+        <div className="flex items-center gap-3">
+          <div
             className={cn(
-              'group flex items-center gap-3 rounded-lg p-2 -mx-2',
-              'transition-colors duration-200',
-              'hover:bg-[var(--accent-light)]'
+              'flex h-10 w-10 items-center justify-center rounded-lg',
+              'bg-[var(--accent-light)] text-[var(--muted)]'
             )}
           >
-            <div
-              className={cn(
-                'flex h-10 w-10 items-center justify-center rounded-lg',
-                'bg-[var(--accent-light)] text-[var(--accent)]',
-                'transition-all duration-200',
-                'group-hover:bg-[var(--accent)] group-hover:text-white'
-              )}
-            >
-              <item.icon className="h-5 w-5" strokeWidth={1.5} />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xs font-medium uppercase tracking-wider text-[var(--muted)]">
-                {item.label}
-              </span>
-              <span className="text-sm font-medium text-[var(--foreground)]">
-                {item.value}
-              </span>
-            </div>
-          </a>
-        ))}
+            <Phone className="h-5 w-5" strokeWidth={1.5} />
+          </div>
+          <div className="text-left">
+            <h3 className="font-[var(--font-display)] text-base font-semibold tracking-tight text-[var(--foreground)]">
+              {t.title}
+            </h3>
+            {name && (
+              <p className="text-xs text-[var(--muted)]">{name}</p>
+            )}
+          </div>
+        </div>
+        <ChevronDown
+          className={cn(
+            'h-5 w-5 text-[var(--muted)] transition-transform duration-300',
+            isExpanded && 'rotate-180'
+          )}
+        />
+      </button>
+
+      {/* Expandable Content */}
+      <div
+        className={cn(
+          'grid transition-all duration-300 ease-in-out',
+          isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+        )}
+      >
+        <div className="overflow-hidden">
+          <div className="px-4 pb-4 space-y-2">
+            {contactItems.map((item) => (
+              <a
+                key={item.label}
+                href={item.href}
+                className={cn(
+                  'group flex items-center gap-3 rounded-lg p-2',
+                  'transition-colors duration-200',
+                  'hover:bg-[var(--accent-light)]'
+                )}
+              >
+                <div
+                  className={cn(
+                    'flex h-10 w-10 items-center justify-center rounded-lg',
+                    'bg-[var(--accent-light)] text-[var(--muted)]',
+                    'transition-all duration-200',
+                    'group-hover:bg-[var(--foreground)] group-hover:text-[var(--background)]'
+                  )}
+                >
+                  <item.icon className="h-5 w-5" strokeWidth={1.5} />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs font-medium uppercase tracking-wider text-[var(--muted)]">
+                    {item.label}
+                  </span>
+                  <span className="text-sm font-medium text-[var(--foreground)]">
+                    {item.value}
+                  </span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )

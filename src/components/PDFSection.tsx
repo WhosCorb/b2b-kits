@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import { useState, useCallback } from 'react'
-import { Lock, FileText, Download, ExternalLink } from 'lucide-react'
+import { Lock, FileText, ExternalLink } from 'lucide-react'
 import { CodeInput } from './CodeInput'
 import { Button } from './ui/Button'
 
@@ -10,24 +10,23 @@ interface PDFSectionProps {
   customerType: string
   lang?: 'es' | 'en'
   className?: string
+  hideHeader?: boolean
 }
 
 const translations = {
   es: {
     title: 'Documentacion del Kit',
     description: 'Introduce el codigo de acceso que aparece en tu tarjeta para desbloquear el contenido exclusivo.',
-    unlocked: 'Contenido desbloqueado',
-    download: 'Descargar PDF',
-    openNew: 'Abrir en nueva pestana',
-    viewingAs: 'Visualizando como',
+    unlocked: 'PDF abierto en nueva pestana',
+    reopenPdf: 'Volver a abrir PDF',
+    codeUsed: 'Codigo utilizado',
   },
   en: {
     title: 'Kit Documentation',
     description: 'Enter the access code from your card to unlock exclusive content.',
-    unlocked: 'Content unlocked',
-    download: 'Download PDF',
-    openNew: 'Open in new tab',
-    viewingAs: 'Viewing as',
+    unlocked: 'PDF opened in new tab',
+    reopenPdf: 'Re-open PDF',
+    codeUsed: 'Code used',
   },
 }
 
@@ -35,6 +34,7 @@ export function PDFSection({
   customerType,
   lang = 'es',
   className,
+  hideHeader = false,
 }: PDFSectionProps) {
   const t = translations[lang]
   const [isUnlocked, setIsUnlocked] = useState(false)
@@ -54,7 +54,28 @@ export function PDFSection({
       if (data.valid && data.pdfUrl) {
         setPdfUrl(data.pdfUrl)
         setValidCode(code)
-        setTimeout(() => setIsUnlocked(true), 500) // Delay for success animation
+
+        // Preload PDF before opening (gives browser head start on download)
+        const preloadPdf = async () => {
+          try {
+            // Start fetching PDF in background - browser will cache it
+            const preloadLink = document.createElement('link')
+            preloadLink.rel = 'prefetch'
+            preloadLink.href = data.pdfUrl
+            preloadLink.as = 'document'
+            document.head.appendChild(preloadLink)
+
+            // Small delay to let prefetch start, then open
+            await new Promise(resolve => setTimeout(resolve, 200))
+            window.open(data.pdfUrl, '_blank')
+          } catch {
+            // Fallback: open directly if prefetch fails
+            window.open(data.pdfUrl, '_blank')
+          }
+        }
+
+        preloadPdf()
+        setTimeout(() => setIsUnlocked(true), 300)
         return true
       }
 
@@ -73,34 +94,36 @@ export function PDFSection({
       )}
     >
       {/* Header */}
-      <div className="border-b bg-gradient-to-r from-[var(--accent-light)] to-transparent p-6">
-        <div className="flex items-center gap-3">
-          <div
-            className={cn(
-              'flex h-10 w-10 items-center justify-center rounded-lg',
-              isUnlocked
-                ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900 dark:text-emerald-400'
-                : 'bg-[var(--accent)] text-white'
-            )}
-          >
-            {isUnlocked ? (
-              <FileText className="h-5 w-5" />
-            ) : (
-              <Lock className="h-5 w-5" />
-            )}
-          </div>
-          <div>
-            <h3 className="font-[var(--font-display)] text-lg font-semibold text-[var(--foreground)]">
-              {t.title}
-            </h3>
-            {isUnlocked && validCode && (
-              <p className="text-xs text-[var(--muted)]">
-                {t.viewingAs}: <span className="font-mono">{validCode}</span>
-              </p>
-            )}
+      {!hideHeader && (
+        <div className="border-b bg-gradient-to-r from-[var(--accent-light)] to-transparent p-6">
+          <div className="flex items-center gap-3">
+            <div
+              className={cn(
+                'flex h-10 w-10 items-center justify-center rounded-lg',
+                isUnlocked
+                  ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900 dark:text-emerald-400'
+                  : 'bg-[var(--accent)] text-white'
+              )}
+            >
+              {isUnlocked ? (
+                <FileText className="h-5 w-5" />
+              ) : (
+                <Lock className="h-5 w-5" />
+              )}
+            </div>
+            <div>
+              <h3 className="font-[var(--font-display)] text-lg font-semibold text-[var(--foreground)]">
+                {t.title}
+              </h3>
+              {isUnlocked && validCode && (
+                <p className="text-xs text-[var(--muted)]">
+                  {t.codeUsed}: <span className="font-mono">{validCode}</span>
+                </p>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Content */}
       <div className="p-6">
@@ -113,50 +136,33 @@ export function PDFSection({
             <CodeInput lang={lang} onValidate={handleValidate} />
           </div>
         ) : (
-          /* Unlocked State */
-          <div className="animate-unlock">
-            {/* PDF Preview */}
-            <div className="relative mb-6 overflow-hidden rounded-lg border bg-neutral-100 dark:bg-neutral-900">
-              <div className="aspect-[3/4] w-full sm:aspect-video">
-                {pdfUrl ? (
-                  <iframe
-                    src={`${pdfUrl}#toolbar=0&navpanes=0`}
-                    className="h-full w-full"
-                    title="PDF Preview"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center">
-                    <FileText className="h-16 w-16 text-[var(--muted)]" />
-                  </div>
-                )}
-              </div>
-
-              {/* Success badge */}
-              <div className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full bg-emerald-500 px-3 py-1 text-xs font-medium text-white shadow-lg">
-                <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
-                {t.unlocked}
-              </div>
+          /* Unlocked State - Success Message */
+          <div className="animate-unlock flex flex-col items-center py-8">
+            {/* Success icon */}
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
+              <FileText className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
             </div>
 
-            {/* Actions */}
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Button
-                variant="primary"
-                className="flex-1"
-                onClick={() => pdfUrl && window.open(pdfUrl, '_blank')}
-              >
-                <Download className="h-4 w-4" />
-                {t.download}
-              </Button>
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => pdfUrl && window.open(pdfUrl, '_blank')}
-              >
-                <ExternalLink className="h-4 w-4" />
-                {t.openNew}
-              </Button>
-            </div>
+            {/* Success message */}
+            <p className="mb-2 text-lg font-medium text-[var(--foreground)]">
+              {t.unlocked}
+            </p>
+
+            {/* Code used */}
+            {validCode && (
+              <p className="mb-6 text-sm text-[var(--muted)]">
+                {t.codeUsed}: <span className="font-mono font-medium">{validCode}</span>
+              </p>
+            )}
+
+            {/* Re-open button */}
+            <Button
+              variant="outline"
+              onClick={() => pdfUrl && window.open(pdfUrl, '_blank')}
+            >
+              <ExternalLink className="h-4 w-4" />
+              {t.reopenPdf}
+            </Button>
           </div>
         )}
       </div>

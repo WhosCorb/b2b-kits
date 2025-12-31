@@ -95,9 +95,9 @@ CREATE POLICY "admin_users_read" ON admin_users
 
 -- Insert initial customer types
 INSERT INTO customer_types (slug, name_es, name_en, description_es, description_en, primary_color) VALUES
-  ('startup', 'Kit Startup', 'Startup Kit', 'Kit completo para startups y emprendedores', 'Complete kit for startups and entrepreneurs', '#6366F1'),
-  ('legal', 'Kit Legal', 'Legal Kit', 'Kit especializado para despachos y profesionales legales', 'Specialized kit for law firms and legal professionals', '#059669'),
-  ('corporate', 'Kit Corporativo', 'Corporate Kit', 'Kit empresarial para grandes corporaciones', 'Enterprise kit for large corporations', '#DC2626');
+  ('startup', 'Kit Startup', 'Startup Kit', 'Kit para emprendedores', 'Kit for entrepreneurs', '#6366F1'),
+  ('oro', 'Kit Oro', 'Gold Kit', 'Kit para profesionales', 'Kit for professionals', '#D97706'),
+  ('zafiro', 'Kit Zafiro', 'Sapphire Kit', 'Kit para empresas', 'Kit for enterprises', '#2563EB');
 
 -- Function to increment use count
 CREATE OR REPLACE FUNCTION increment_code_use_count(code_id_param UUID)

@@ -26,8 +26,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         'shadow-[var(--shadow-md)]',
       ].join(' '),
       secondary: [
-        'bg-[var(--accent-light)] text-[var(--accent)]',
-        'hover:bg-[var(--accent)] hover:text-white',
+        'bg-[var(--accent-light)] text-[var(--foreground)]',
+        'border border-[var(--border)]',
+        'hover:bg-[var(--foreground)] hover:text-[var(--background)]',
         'active:scale-[0.98]',
       ].join(' '),
       ghost: [

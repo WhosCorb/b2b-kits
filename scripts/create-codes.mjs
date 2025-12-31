@@ -27,13 +27,15 @@ async function main() {
   console.log('Customer types:', types.map(t => t.slug).join(', '))
 
   // Create test codes for each type
+  // PDF paths are relative to the 'kit-pdfs' Supabase Storage bucket
+  // Example: 'startup/documento.pdf' -> stored at kit-pdfs/startup/documento.pdf
   const testCodes = [
-    { code: 'START1', type: 'startup', pdf: 'https://example.com/startup-kit.pdf' },
-    { code: 'START2', type: 'startup', pdf: 'https://example.com/startup-kit.pdf' },
-    { code: 'LEGAL1', type: 'legal', pdf: 'https://example.com/legal-kit.pdf' },
-    { code: 'LEGAL2', type: 'legal', pdf: 'https://example.com/legal-kit.pdf' },
-    { code: 'CORP01', type: 'corporate', pdf: 'https://example.com/corporate-kit.pdf' },
-    { code: 'CORP02', type: 'corporate', pdf: 'https://example.com/corporate-kit.pdf' },
+    { code: 'START1', type: 'startup', pdf: 'startup/documento-startup.pdf' },
+    { code: 'START2', type: 'startup', pdf: 'startup/documento-startup.pdf' },
+    { code: 'ORO001', type: 'oro', pdf: 'oro/documento-oro.pdf' },
+    { code: 'ORO002', type: 'oro', pdf: 'oro/documento-oro.pdf' },
+    { code: 'ZAFIR1', type: 'zafiro', pdf: 'zafiro/documento-zafiro.pdf' },
+    { code: 'ZAFIR2', type: 'zafiro', pdf: 'zafiro/documento-zafiro.pdf' },
   ]
 
   console.log('\nCreating access codes...')

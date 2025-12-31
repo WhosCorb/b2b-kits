@@ -11,17 +11,17 @@
   --card: #ffffff;
   --card-foreground: #1a1a1a;
 
-  /* Customer type accents */
-  --accent-startup: #4f46e5;
-  --accent-startup-light: #e0e7ff;
-  --accent-legal: #059669;
-  --accent-legal-light: #d1fae5;
-  --accent-corporate: #dc2626;
-  --accent-corporate-light: #fee2e2;
+  /* Kit type accents */
+  --accent-startup: #0d9488;
+  --accent-startup-light: #ccfbf1;
+  --accent-oro: #d97706;
+  --accent-oro-light: #fef3c7;
+  --accent-zafiro: #0284c7;
+  --accent-zafiro-light: #e0f2fe;
 
-  /* Current accent (set by page) */
-  --accent: var(--accent-startup);
-  --accent-light: var(--accent-startup-light);
+  /* Default accent (white/neutral) */
+  --accent: #ffffff;
+  --accent-light: #f5f5f5;
 
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.03);
@@ -40,9 +40,11 @@
     --card: #141414;
     --card-foreground: #f5f5f5;
 
-    --accent-startup-light: #1e1b4b;
-    --accent-legal-light: #022c22;
-    --accent-corporate-light: #450a0a;
+    --accent-startup-light: #042f2e;
+    --accent-oro-light: #451a03;
+    --accent-zafiro-light: #082f49;
+
+    --accent-light: #262626;
 
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.2);
@@ -80,20 +82,20 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Accent color utilities */
-[data-type="startup"] {
+/* Accent color utilities - changes entire page accent based on selected kit */
+[data-kit="startup"] {
   --accent: var(--accent-startup);
   --accent-light: var(--accent-startup-light);
 }
 
-[data-type="legal"] {
-  --accent: var(--accent-legal);
-  --accent-light: var(--accent-legal-light);
+[data-kit="oro"] {
+  --accent: var(--accent-oro);
+  --accent-light: var(--accent-oro-light);
 }
 
-[data-type="corporate"] {
-  --accent: var(--accent-corporate);
-  --accent-light: var(--accent-corporate-light);
+[data-kit="zafiro"] {
+  --accent: var(--accent-zafiro);
+  --accent-light: var(--accent-zafiro-light);
 }
 
 /* Subtle grain texture overlay */

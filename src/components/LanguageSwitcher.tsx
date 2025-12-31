@@ -8,25 +8,25 @@ export function LanguageSwitcher() {
 
   return (
     <div className="flex items-center gap-2">
-      <Globe size={16} className="text-neutral-500" />
+      <Globe size={16} className="text-[var(--muted)]" />
       <button
         onClick={() => setLocale('es')}
         className={`text-sm transition-colors ${
           locale === 'es'
-            ? 'text-neutral-100 font-medium'
-            : 'text-neutral-500 hover:text-neutral-300'
+            ? 'text-[var(--foreground)] font-medium'
+            : 'text-[var(--muted)] hover:text-[var(--foreground)]'
         }`}
         aria-label={t.common.spanish}
       >
         ES
       </button>
-      <span className="text-neutral-600">/</span>
+      <span className="text-[var(--muted-foreground)]">/</span>
       <button
         onClick={() => setLocale('en')}
         className={`text-sm transition-colors ${
           locale === 'en'
-            ? 'text-neutral-100 font-medium'
-            : 'text-neutral-500 hover:text-neutral-300'
+            ? 'text-[var(--foreground)] font-medium'
+            : 'text-[var(--muted)] hover:text-[var(--foreground)]'
         }`}
         aria-label={t.common.english}
       >

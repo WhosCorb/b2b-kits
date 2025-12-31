@@ -64,8 +64,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     // Verify code matches the requested kit type
-    const customerType = accessCode.customer_type as unknown as { slug: string } | null
-    const codeType = customerType?.slug
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const codeType = (accessCode.customer_type as any)?.slug
     if (codeType !== type) {
       return NextResponse.json({ error: 'Code not valid for this kit' }, { status: 401 })
     }

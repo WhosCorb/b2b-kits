@@ -17,7 +17,7 @@ const translations = {
   es: {
     title: 'Documentacion del Kit',
     description: 'Introduce el codigo de acceso que aparece en tu tarjeta para desbloquear el contenido exclusivo.',
-    unlocked: 'PDF abierto en nueva pestana',
+    unlocked: 'PDF abierto en una nueva pestaña',
     reopenPdf: 'Volver a abrir PDF',
     codeUsed: 'Codigo utilizado',
   },

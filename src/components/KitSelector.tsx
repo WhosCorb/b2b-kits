@@ -1,7 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { ChevronDown, Rocket, Award, Gem } from 'lucide-react'
 import { PDFSection } from './PDFSection'
 import { useKit } from './LandingWrapper'
@@ -73,38 +73,8 @@ export function KitSelector({ lang = 'es', className }: KitSelectorProps) {
     setSelectedKit(expandedKit)
   }, [expandedKit, setSelectedKit])
 
-  // Preload PDF when kit is expanded
-  const preloadPdf = useCallback(async (kitId: KitType) => {
-    try {
-      const response = await fetch(`/api/preload-pdf?type=${kitId}`)
-      const data = await response.json()
-
-      if (data.url) {
-        // Create prefetch link to start downloading the PDF in background
-        const existingLink = document.querySelector(`link[data-pdf-preload="${kitId}"]`)
-        if (!existingLink) {
-          const preloadLink = document.createElement('link')
-          preloadLink.rel = 'prefetch'
-          preloadLink.href = data.url
-          preloadLink.as = 'document'
-          preloadLink.setAttribute('data-pdf-preload', kitId)
-          document.head.appendChild(preloadLink)
-        }
-      }
-    } catch (error) {
-      // Silently fail - preloading is an optimization, not critical
-      console.debug('PDF preload failed:', error)
-    }
-  }, [])
-
   const handleKitClick = (kitId: KitType) => {
-    const isExpanding = expandedKit !== kitId
-    setExpandedKit(isExpanding ? kitId : null)
-
-    // Preload PDF when expanding (not collapsing)
-    if (isExpanding) {
-      preloadPdf(kitId)
-    }
+    setExpandedKit(expandedKit === kitId ? null : kitId)
   }
 
   return (

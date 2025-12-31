@@ -51,30 +51,14 @@ export function PDFSection({
 
       const data = await response.json()
 
-      if (data.valid && data.pdfUrl) {
-        setPdfUrl(data.pdfUrl)
+      if (data.valid) {
+        // Use custom domain URL instead of Supabase signed URL
+        const customPdfUrl = `/api/pdf/${customerType}?code=${encodeURIComponent(code)}`
+        setPdfUrl(customPdfUrl)
         setValidCode(code)
 
-        // Preload PDF before opening (gives browser head start on download)
-        const preloadPdf = async () => {
-          try {
-            // Start fetching PDF in background - browser will cache it
-            const preloadLink = document.createElement('link')
-            preloadLink.rel = 'prefetch'
-            preloadLink.href = data.pdfUrl
-            preloadLink.as = 'document'
-            document.head.appendChild(preloadLink)
-
-            // Small delay to let prefetch start, then open
-            await new Promise(resolve => setTimeout(resolve, 200))
-            window.open(data.pdfUrl, '_blank')
-          } catch {
-            // Fallback: open directly if prefetch fails
-            window.open(data.pdfUrl, '_blank')
-          }
-        }
-
-        preloadPdf()
+        // Open PDF in new tab
+        window.open(customPdfUrl, '_blank')
         setTimeout(() => setIsUnlocked(true), 300)
         return true
       }

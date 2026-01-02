@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
 
 // Simple in-memory rate limiting (use Redis in production for multi-instance)
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
@@ -180,33 +179,10 @@ export async function POST(request: NextRequest) {
       country: null, // Could be populated via geo-IP service
     })
 
-    // Generate signed URL for PDF access (valid for 1 hour)
-    let pdfUrl = accessCode.pdf_url
-
-    // If pdf_url is a storage path (not a full URL), generate a signed URL
-    if (pdfUrl && !pdfUrl.startsWith('http')) {
-      const adminClient = createAdminClient()
-      const { data: signedUrlData, error: signedUrlError } = await adminClient
-        .storage
-        .from('kit-pdfs')
-        .createSignedUrl(pdfUrl, 3600) // 1 hour expiration
-
-      if (signedUrlError) {
-        console.error('Error generating signed URL:', signedUrlError)
-        return NextResponse.json(
-          { valid: false, error: 'Could not access PDF', errorCode: 'PDF_ACCESS_ERROR' },
-          { status: 500 }
-        )
-      }
-
-      pdfUrl = signedUrlData.signedUrl
-    }
-
-    // Return success with signed PDF URL
+    // Return success - PDF is served via /api/pdf/[type] route
     return NextResponse.json(
       {
         valid: true,
-        pdfUrl,
         customerType: codeCustomerType?.slug,
       },
       {

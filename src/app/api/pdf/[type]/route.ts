@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { verifyPdfToken } from '@/lib/auth/codes'
 
 // Map customer types to their PDF paths (horizontal and vertical versions)
 const pdfPaths: Record<string, { hor: string; ver: string }> = {
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { type } = await params
     const { searchParams } = new URL(request.url)
-    const code = searchParams.get('code')
+    const token = searchParams.get('token')
     const orientation = searchParams.get('orientation') || 'hor' // Default to horizontal
 
     // Validate type
@@ -39,50 +39,20 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Invalid orientation' }, { status: 400 })
     }
 
-    // Validate code is provided
-    if (!code) {
-      return NextResponse.json({ error: 'Access code required' }, { status: 401 })
+    // Validate token is provided
+    if (!token) {
+      return NextResponse.json({ error: 'Access token required' }, { status: 401 })
     }
 
-    // Verify the code is valid
-    const supabase = await createClient()
-    const { data: accessCode, error: codeError } = await supabase
-      .from('access_codes')
-      .select(`
-        id,
-        is_active,
-        expires_at,
-        max_uses,
-        use_count,
-        customer_type:customer_types!inner(slug)
-      `)
-      .eq('code', code.toUpperCase())
-      .single()
-
-    if (codeError || !accessCode) {
-      return NextResponse.json({ error: 'Invalid code' }, { status: 401 })
+    // Verify the token
+    const tokenData = verifyPdfToken(token)
+    if (!tokenData) {
+      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 })
     }
 
-    // Check if code is active
-    if (!accessCode.is_active) {
-      return NextResponse.json({ error: 'Code is inactive' }, { status: 401 })
-    }
-
-    // Check expiration
-    if (accessCode.expires_at && new Date(accessCode.expires_at) < new Date()) {
-      return NextResponse.json({ error: 'Code has expired' }, { status: 401 })
-    }
-
-    // Check max uses
-    if (accessCode.max_uses && accessCode.use_count >= accessCode.max_uses) {
-      return NextResponse.json({ error: 'Code usage limit reached' }, { status: 401 })
-    }
-
-    // Verify code matches the requested kit type
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const codeType = (accessCode.customer_type as any)?.slug
-    if (codeType !== type) {
-      return NextResponse.json({ error: 'Code not valid for this kit' }, { status: 401 })
+    // Verify token matches the requested kit type
+    if (tokenData.customerType !== type) {
+      return NextResponse.json({ error: 'Token not valid for this kit' }, { status: 401 })
     }
 
     // Fetch PDF from Supabase Storage

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { verifyCode, generatePdfToken } from '@/lib/auth/codes'
 
 // Simple in-memory rate limiting (use Redis in production for multi-instance)
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
@@ -93,13 +94,13 @@ export async function POST(request: NextRequest) {
     // Connect to Supabase
     const supabase = await createClient()
 
-    // Query for valid code
-    const { data: accessCode, error: queryError } = await supabase
+    // Query active codes - we'll verify against hash
+    let query = supabase
       .from('access_codes')
       .select(`
         id,
         code,
-        pdf_url,
+        code_hash,
         customer_type_id,
         expires_at,
         max_uses,
@@ -111,11 +112,24 @@ export async function POST(request: NextRequest) {
           name_en
         )
       `)
-      .eq('code', normalizedCode)
       .eq('is_active', true)
-      .single()
 
-    if (queryError || !accessCode) {
+    // Filter by customer type if provided
+    if (customerType) {
+      const { data: typeData } = await supabase
+        .from('customer_types')
+        .select('id')
+        .eq('slug', customerType)
+        .single()
+
+      if (typeData) {
+        query = query.eq('customer_type_id', typeData.id)
+      }
+    }
+
+    const { data: codes, error: queryError } = await query
+
+    if (queryError || !codes || codes.length === 0) {
       return NextResponse.json(
         { valid: false, error: 'Invalid code', errorCode: 'CODE_NOT_FOUND' },
         {
@@ -125,18 +139,35 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if code matches the customer type (if provided)
-    // customer_types comes as an object from the single() query join
-    const codeCustomerType = accessCode.customer_types as unknown as { slug: string; name_es: string; name_en: string } | null
-    if (customerType && codeCustomerType?.slug !== customerType) {
+    // Find matching code (supports both hashed and legacy plain codes)
+    let accessCode = null
+    for (const code of codes) {
+      // Try hashed comparison first
+      if (code.code_hash) {
+        const isMatch = await verifyCode(normalizedCode, code.code_hash)
+        if (isMatch) {
+          accessCode = code
+          break
+        }
+      }
+      // Fallback to plain code comparison (legacy)
+      else if (code.code === normalizedCode) {
+        accessCode = code
+        break
+      }
+    }
+
+    if (!accessCode) {
       return NextResponse.json(
-        { valid: false, error: 'Code not valid for this kit type', errorCode: 'TYPE_MISMATCH' },
+        { valid: false, error: 'Invalid code', errorCode: 'CODE_NOT_FOUND' },
         {
           status: 401,
           headers: { 'X-RateLimit-Remaining': String(remaining) },
         }
       )
     }
+
+    const codeCustomerType = accessCode.customer_types as unknown as { slug: string; name_es: string; name_en: string } | null
 
     // Check expiration
     if (accessCode.expires_at && new Date(accessCode.expires_at) < new Date()) {
@@ -179,10 +210,17 @@ export async function POST(request: NextRequest) {
       country: null, // Could be populated via geo-IP service
     })
 
-    // Return success - PDF is served via /api/pdf/[type] route
+    // Generate short-lived token for PDF access
+    const token = generatePdfToken({
+      codeId: accessCode.id,
+      customerType: codeCustomerType?.slug || customerType,
+    })
+
+    // Return success with token
     return NextResponse.json(
       {
         valid: true,
+        token,
         customerType: codeCustomerType?.slug,
       },
       {

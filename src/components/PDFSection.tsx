@@ -51,18 +51,18 @@ export function PDFSection({
 
       const data = await response.json()
 
-      if (data.valid) {
+      if (data.valid && data.token) {
         // Detect screen orientation: vertical for portrait/mobile, horizontal for landscape/desktop
         const isPortrait = window.innerHeight > window.innerWidth
         const orientation = isPortrait ? 'ver' : 'hor'
 
-        // Use custom domain URL instead of Supabase signed URL
-        const customPdfUrl = `/api/pdf/${customerType}?code=${encodeURIComponent(code)}&orientation=${orientation}`
-        setPdfUrl(customPdfUrl)
+        // Use token-based URL (more secure, token expires in 10 min)
+        const pdfUrl = `/api/pdf/${customerType}?token=${encodeURIComponent(data.token)}&orientation=${orientation}`
+        setPdfUrl(pdfUrl)
         setValidCode(code)
 
         // Open PDF in new tab
-        window.open(customPdfUrl, '_blank')
+        window.open(pdfUrl, '_blank')
         setTimeout(() => setIsUnlocked(true), 300)
         return true
       }

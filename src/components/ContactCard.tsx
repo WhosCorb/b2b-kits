@@ -1,7 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { Mail, Phone, MapPin, ChevronDown } from 'lucide-react'
+import { Mail, Phone, MapPin, ChevronDown, Calendar } from 'lucide-react'
 import { useState } from 'react'
 
 interface ContactCardProps {
@@ -20,14 +20,18 @@ const translations = {
     phone: 'Telefono',
     email: 'Email',
     address: 'Direccion',
+    bookMeeting: 'Agenda una reunion',
   },
   en: {
     title: 'Contact',
     phone: 'Phone',
     email: 'Email',
     address: 'Address',
+    bookMeeting: 'Book a meeting',
   },
 }
+
+const BOOKING_URL = 'https://outlook.office.com/bookwithme/user/2447189370a243eb845c01a574747438@benotac.es/meetingtype/pkByWyjcYkGgk7Oh9JFu1A2?anonymous&ismsaljsauthenabled&ep=mCardFromTile'
 
 export function ContactCard({
   name,
@@ -149,6 +153,23 @@ export function ContactCard({
                 </div>
               </a>
             ))}
+
+            {/* Book a meeting button */}
+            <a
+              href={BOOKING_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                'mt-2 flex items-center justify-center gap-2 rounded-lg p-3',
+                'bg-[var(--foreground)] text-[var(--background)]',
+                'font-medium text-sm',
+                'transition-all duration-200',
+                'hover:opacity-90 active:scale-[0.98]'
+              )}
+            >
+              <Calendar className="h-4 w-4" strokeWidth={2} />
+              {t.bookMeeting}
+            </a>
           </div>
         </div>
       </div>

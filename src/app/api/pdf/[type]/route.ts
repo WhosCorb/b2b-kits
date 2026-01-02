@@ -2,11 +2,20 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
-// Map customer types to their PDF paths
-const pdfPaths: Record<string, string> = {
-  startup: 'startup/documento-startup.pdf',
-  oro: 'oro/documento-oro.pdf',
-  zafiro: 'zafiro/documento-zafiro.pdf',
+// Map customer types to their PDF paths (horizontal and vertical versions)
+const pdfPaths: Record<string, { hor: string; ver: string }> = {
+  startup: {
+    hor: 'startup/camp_q1_26_v1.1_startup_hor.pdf',
+    ver: 'startup/camp_q1_26_v1.1_startup_ver.pdf',
+  },
+  oro: {
+    hor: 'oro/camp_q1_26_v1.1_oro_hor.pdf',
+    ver: 'oro/camp_q1_26_v1.1_oro_ver.pdf',
+  },
+  zafiro: {
+    hor: 'zafiro/camp_q1_26_v1.1_zafiro_hor.pdf',
+    ver: 'zafiro/camp_q1_26_v1.1_zafiro_ver.pdf',
+  },
 }
 
 interface RouteParams {
@@ -18,10 +27,16 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const { type } = await params
     const { searchParams } = new URL(request.url)
     const code = searchParams.get('code')
+    const orientation = searchParams.get('orientation') || 'hor' // Default to horizontal
 
     // Validate type
     if (!pdfPaths[type]) {
       return NextResponse.json({ error: 'Invalid kit type' }, { status: 400 })
+    }
+
+    // Validate orientation
+    if (orientation !== 'hor' && orientation !== 'ver') {
+      return NextResponse.json({ error: 'Invalid orientation' }, { status: 400 })
     }
 
     // Validate code is provided
@@ -72,7 +87,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     // Fetch PDF from Supabase Storage
     const adminClient = createAdminClient()
-    const pdfPath = pdfPaths[type]
+    const pdfPath = pdfPaths[type][orientation]
 
     const { data: pdfData, error: pdfError } = await adminClient
       .storage

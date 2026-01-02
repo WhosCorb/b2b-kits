@@ -52,8 +52,12 @@ export function PDFSection({
       const data = await response.json()
 
       if (data.valid) {
+        // Detect screen orientation: vertical for portrait/mobile, horizontal for landscape/desktop
+        const isPortrait = window.innerHeight > window.innerWidth
+        const orientation = isPortrait ? 'ver' : 'hor'
+
         // Use custom domain URL instead of Supabase signed URL
-        const customPdfUrl = `/api/pdf/${customerType}?code=${encodeURIComponent(code)}`
+        const customPdfUrl = `/api/pdf/${customerType}?code=${encodeURIComponent(code)}&orientation=${orientation}`
         setPdfUrl(customPdfUrl)
         setValidCode(code)
 
